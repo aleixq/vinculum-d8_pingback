@@ -1,0 +1,7 @@
+name: Linkback pingback
+type: module
+description: Pingback handler for linkback module.
+core: 8.x
+package: services
+dependencies:
+  - linkback

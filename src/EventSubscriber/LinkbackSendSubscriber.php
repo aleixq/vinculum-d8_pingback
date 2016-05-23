@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\vinculum_pingback\EventSubscriber;
+namespace Drupal\linkback_pingback\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\EventDispatcher\Event;
@@ -12,11 +12,11 @@ use Psr\Http\Message\RequestInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
- * Class VinculumSendSubscriber.
+ * Class LinkbackSendSubscriber.
  *
- * @package Drupal\vinculum_pingback
+ * @package Drupal\linkback_pingback
  */
-class VinculumSendSubscriber implements EventSubscriberInterface {
+class LinkbackSendSubscriber implements EventSubscriberInterface {
 
   /**
    * Agent.
@@ -24,7 +24,7 @@ class VinculumSendSubscriber implements EventSubscriberInterface {
    * @const string
    */
   // User-agent to use when querying remote sites.
-  const UA = 'Drupal Pingback (+http://drupal.org/project/vinculum)';
+  const UA = 'Drupal Pingback (+http://drupal.org/project/linkback)';
 
   /**
    * GuzzleHttp\Client definition.
@@ -57,19 +57,19 @@ class VinculumSendSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   static function getSubscribedEvents() {
-    $events['vinculum_send'] = ['onVinculumSend'];
+    $events['linkback_send'] = ['onLinkbackSend'];
 
     return $events;
   }
 
   /**
-   * This method is called whenever the vinculum_send event is
+   * This method is called whenever the linkback_send event is
    * dispatched.
    *
    * @param GetResponseEvent $event
    */
-  public function onVinculumSend(Event $event) {
-    drupal_set_message('Event vinculum_send thrown by Subscriber in module vinculum_pingback.', 'status', TRUE);
+  public function onLinkbackSend(Event $event) {
+    drupal_set_message('Event linkback_send thrown by Subscriber in module linkback_pingback.', 'status', TRUE);
     $this->sendPingback($event->getSourceUrl(), $event->getTargetUrl());
   }
 

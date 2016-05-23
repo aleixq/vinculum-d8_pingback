@@ -1,14 +1,14 @@
 {
-  "name": "drupal/vinculum_pingback",
+  "name": "drupal/linkback_pingback",
   "type": "drupal-module",
   "description": "pingback functions for vnculum",
   "keywords": ["Drupal"],
   "license": "GPL-2.0+",
-  "homepage": "https://www.drupal.org/project/vinculum_pingback",
+  "homepage": "https://www.drupal.org/project/linkback_pingback",
   "minimum-stability": "dev",
   "support": {
-    "issues": "http://drupal.org/project/issues/vinculum_pingback",
-    "source": "http://cgit.drupalcode.org/vinculum_pingback"
+    "issues": "http://drupal.org/project/issues/linkback_pingback",
+    "source": "http://cgit.drupalcode.org/linkback_pingback"
   },
   "require": { }
 }

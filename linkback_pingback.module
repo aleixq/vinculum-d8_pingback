@@ -2,26 +2,26 @@
 
 /**
  * @file
- * Contains vinculum_pingback.module..
+ * Contains linkback_pingback.module..
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityStorageException;
 use Symfony\Component\DomCrawler\Crawler;
-use \Drupal\vinculum\Entity\VinculumReceived;
+use \Drupal\linkback\Entity\LinkbackReceived;
 
 use Drupal\Core\Language\LanguageInterface;
 /**
  * Implements hook_help().
  */
-function vinculum_pingback_help($route_name, RouteMatchInterface $route_match) {
+function linkback_pingback_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    // Main module help for the vinculum_pingback module.
-    case 'help.page.vinculum_pingback':
+    // Main module help for the linkback_pingback module.
+    case 'help.page.linkback_pingback':
       $output = '';
       $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('pingback functions for vinculum') . '</p>';
+      $output .= '<p>' . t('pingback functions for linkback') . '</p>';
       return $output;
 
     default:
@@ -34,11 +34,11 @@ function vinculum_pingback_help($route_name, RouteMatchInterface $route_match) {
  *
  * This XML-RPC endpoint handles registration of incoming pingback requests.
  */
-function vinculum_pingback_xmlrpc() {
+function linkback_pingback_xmlrpc() {
   return array(
     array(
       'pingback.ping',
-      'vinculum_pingback__receive_pingback',
+      'linkback_pingback__receive_pingback',
       // Return value is a string.
       // There are 2 string parameters.
       array('string', 'string', 'string'),
@@ -53,9 +53,9 @@ function vinculum_pingback_xmlrpc() {
  * Adds a HTTP header and a <link> tag which give the pingback server endpoint
  * URL.
  */
-function vinculum_pingback_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+function linkback_pingback_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
   // @TODO: configurable view-modes?
-  if ($view_mode == 'full' /*&& vinculum_node_allows_vinculum($node, 'receive')*/) {
+  if ($view_mode == 'full' /*&& linkback_node_allows_linkback($node, 'receive')*/) {
     $pingback_endpoint = Url::fromRoute('xmlrpc', [], ['absolute' => TRUE ] )->toString();
     $pingback_link = array(
       '#type' => 'html_tag',
@@ -65,7 +65,7 @@ function vinculum_pingback_node_view(array &$build, \Drupal\Core\Entity\EntityIn
         'href' => $pingback_endpoint,
       ),
     );
-    $build['#attached']['html_head'][] = [$pingback_link, 'vinculum_pingback'];
+    $build['#attached']['html_head'][] = [$pingback_link, 'linkback_pingback'];
   }
 }
 
@@ -78,7 +78,7 @@ function vinculum_pingback_node_view(array &$build, \Drupal\Core\Entity\EntityIn
  * @param string $target_uri
  *   The URL of the node on this site.
  */
-function vinculum_pingback__receive_pingback($source_uri, $target_uri) {
+function linkback_pingback__receive_pingback($source_uri, $target_uri) {
   // The pingback protocol defines a static schema of 2 fields: sourceURI and
   // targetURI. No other data may be exchanged within the pingback protocol.
   //TODO Arrange the incoming language to allow obtaining the content url
@@ -105,22 +105,22 @@ function vinculum_pingback__receive_pingback($source_uri, $target_uri) {
   }
   catch (UnexpectedValueException $exception){
     //Despite content existance will be checked by entity later, doing now will speed up.
-    list ($error_code, $error_message) = _vinculum_pingback__protocol_errors(VINCULUM_ERROR_LOCAL_NODE_NOT_FOUND);
+    list ($error_code, $error_message) = _linkback_pingback__protocol_errors(VINCULUM_ERROR_LOCAL_NODE_NOT_FOUND);
     return xmlrpc_error($error_code, $error_message);
   }
 
-  $vinculum = entity_create('vinculum_received',[
-    'handler'  => 'vinculum_pingback',
+  $linkback = entity_create('linkback_received',[
+    'handler'  => 'linkback_pingback',
     'ref_content' => $ref_content,
     'url'      => $source_uri,
   ]);
 
   try{
-    $result = $vinculum->save();
+    $result = $linkback->save();
     $message = t('Pingback from @source to @target registered.', array('@source' => $source_uri, '@target' => $target_uri));
     return (string)$message;
   }catch (EntityStorageException $exception) {
-    list ($error_code, $error_message) = _vinculum_pingback__protocol_errors($exception->getCode());
+    list ($error_code, $error_message) = _linkback_pingback__protocol_errors($exception->getCode());
     return xmlrpc_error($error_code, $error_message);   
   }
 }
@@ -128,7 +128,7 @@ function vinculum_pingback__receive_pingback($source_uri, $target_uri) {
 /**
  * Lookup the correct pingback protocol-response for an error.
  */
-function _vinculum_pingback__protocol_errors($error_code) {
+function _linkback_pingback__protocol_errors($error_code) {
   // Error codes defined by the protocol documentation:
   //
   // 0

@@ -1,7 +1,0 @@
-name: vinculum_pingback
-type: module
-description: pingback functions for vinculum
-core: 8.x
-package: services
-dependencies:
-  - vinculum

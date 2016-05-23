@@ -1,7 +1,0 @@
-services:
-  vinculum_pingback.send_subscriber:
-    class: Drupal\vinculum_pingback\EventSubscriber\VinculumSendSubscriber
-    arguments: ["@http_client", '@logger.channel.vinculum']
-    tags:
-      - { name: event_subscriber }
-
