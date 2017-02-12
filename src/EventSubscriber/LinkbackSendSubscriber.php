@@ -70,7 +70,7 @@ class LinkbackSendSubscriber implements EventSubscriberInterface {
    */
   public function onLinkbackSend(Event $event) {
     drupal_set_message('Event linkback_send thrown by Subscriber in module linkback_pingback.', 'status', TRUE);
-    $this->sendPingback($event->getSourceUrl(), $event->getTargetUrl());
+    $this->sendPingback($event->getSource(), $event->getTarget());
   }
 
   /**
