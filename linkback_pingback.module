@@ -105,10 +105,11 @@ function linkback_pingback__receive_pingback($source_uri, $target_uri) {
     return xmlrpc_error($error_code, $error_message);
   }
 
-  $linkback = entity_create('linkback_received', [
+  $linkback = entity_create('linkback', [
     'handler'  => 'linkback_pingback',
     'ref_content' => $ref_content,
     'url'      => $source_uri,
+    'type'     => 'received',
   ]);
 
   try {
