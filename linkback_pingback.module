@@ -105,7 +105,7 @@ function linkback_pingback__receive_pingback($source_uri, $target_uri) {
   }
   catch (UnexpectedValueException $exception){
     //Despite content existance will be checked by entity later, doing now will speed up.
-    list ($error_code, $error_message) = _linkback_pingback__protocol_errors(VINCULUM_ERROR_LOCAL_NODE_NOT_FOUND);
+    list ($error_code, $error_message) = _linkback_pingback__protocol_errors(LINKBACK_ERROR_LOCAL_NODE_NOT_FOUND);
     return xmlrpc_error($error_code, $error_message);
   }
 
@@ -166,13 +166,13 @@ function _linkback_pingback__protocol_errors($error_code) {
   // be used by pingback proxies when propagating errors.
 
   switch ($error_code) {
-    case VINCULUM_ERROR_LOCAL_NODE_NOT_FOUND:
+    case LINKBACK_ERROR_LOCAL_NODE_NOT_FOUND:
       return array(0x0020, 'The specified target URI does not exist.');
 
-    case VINCULUM_ERROR_LOCAL_NODE_REFBACK_NOT_ALLOWED:
+    case LINKBACK_ERROR_LOCAL_NODE_REFBACK_NOT_ALLOWED:
       return array(0x0021, 'The specified target URI cannot be used as a target.');
 
-    case VINCULUM_ERROR_REFBACK_ALREADY_REGISTERED:
+    case LINKBACK_ERROR_REFBACK_ALREADY_REGISTERED:
       return array(0x0030, 'The pingback has already been registered.');
 
     default:
