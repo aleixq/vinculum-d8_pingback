@@ -5,13 +5,12 @@
  * Contains linkback_pingback.module..
  */
 
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityStorageException;
-use Symfony\Component\DomCrawler\Crawler;
-use \Drupal\linkback\Entity\LinkbackReceived;
 
-use Drupal\Core\Language\LanguageInterface;
 /**
  * Implements hook_help().
  */
@@ -27,7 +26,6 @@ function linkback_pingback_help($route_name, RouteMatchInterface $route_match) {
     default:
   }
 }
-
 
 /**
  * Implements hook_xmlrpc().
@@ -53,10 +51,10 @@ function linkback_pingback_xmlrpc() {
  * Adds a HTTP header and a <link> tag which give the pingback server endpoint
  * URL.
  */
-function linkback_pingback_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+function linkback_pingback_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   // @TODO: configurable view-modes?
   if ($view_mode == 'full' /*&& linkback_node_allows_linkback($node, 'receive')*/) {
-    $pingback_endpoint = Url::fromRoute('xmlrpc', [], ['absolute' => TRUE ] )->toString();
+    $pingback_endpoint = Url::fromRoute('xmlrpc', [], ['absolute' => TRUE])->toString();
     $pingback_link = array(
       '#type' => 'html_tag',
       '#tag' => 'link',
@@ -69,7 +67,6 @@ function linkback_pingback_node_view(array &$build, \Drupal\Core\Entity\EntityIn
   }
 }
 
-
 /**
  * XML-RPC callback for the pingback.ping method.
  *
@@ -81,47 +78,47 @@ function linkback_pingback_node_view(array &$build, \Drupal\Core\Entity\EntityIn
 function linkback_pingback__receive_pingback($source_uri, $target_uri) {
   // The pingback protocol defines a static schema of 2 fields: sourceURI and
   // targetURI. No other data may be exchanged within the pingback protocol.
-  //TODO Arrange the incoming language to allow obtaining the content url
+  // TODO Arrange the incoming language to allow obtaining the content url
   // If target_uri is published in es and you connect to web in en , Url::fromuserinput
-  // will not obtain the content id (nid).  
+  // will not obtain the content id (nid).
   // For a case where field translate is used it's not problematic...
   global $base_url;
   try {
-    $alias = str_replace($base_url, "", $target_uri ) ;
+    $alias = str_replace($base_url, "", $target_uri);
 
     $langs = Drupal::languageManager()->getLanguages();
-    foreach ( $langs as $lan)
-    {
-      //Iterate over all languages to get entity id, here we can obtain entity type.
-      $route_params = Url::fromUserInput(str_replace($base_url, "", $target_uri ) , ['language' => $lan ] )->getRouteParameters() ;
-      foreach ($route_params as $entity_type => $entity_id){
-        //VALID ONLY FOR FIELD translate (as node translate has various nids for set)
-        if ($entity_id){
+    foreach ($langs as $lan) {
+      // Iterate over all languages to get entity id, here we can obtain entity type.
+      $route_params = Url::fromUserInput(str_replace($base_url, "", $target_uri), ['language' => $lan])->getRouteParameters();
+      foreach ($route_params as $entity_type => $entity_id) {
+        // VALID ONLY FOR FIELD translate (as node translate has various nids for set)
+        if ($entity_id) {
           $ref_content = $entity_id;
           break;
         }
       }
     }
   }
-  catch (UnexpectedValueException $exception){
-    //Despite content existance will be checked by entity later, doing now will speed up.
+  catch (UnexpectedValueException $exception) {
+    // Despite content existance will be checked by entity later, doing now will speed up.
     list ($error_code, $error_message) = _linkback_pingback__protocol_errors(LINKBACK_ERROR_LOCAL_NODE_NOT_FOUND);
     return xmlrpc_error($error_code, $error_message);
   }
 
-  $linkback = entity_create('linkback_received',[
+  $linkback = entity_create('linkback_received', [
     'handler'  => 'linkback_pingback',
     'ref_content' => $ref_content,
     'url'      => $source_uri,
   ]);
 
-  try{
+  try {
     $result = $linkback->save();
     $message = t('Pingback from @source to @target registered.', array('@source' => $source_uri, '@target' => $target_uri));
-    return (string)$message;
-  }catch (EntityStorageException $exception) {
+    return (string) $message;
+  }
+  catch (EntityStorageException $exception) {
     list ($error_code, $error_message) = _linkback_pingback__protocol_errors($exception->getCode());
-    return xmlrpc_error($error_code, $error_message);   
+    return xmlrpc_error($error_code, $error_message);
   }
 }
 
@@ -164,7 +161,6 @@ function _linkback_pingback__protocol_errors($error_code) {
   // error from an upstream server, and therefore could not complete the
   // request. This is similar to HTTP's 402 Bad Gateway error. This error SHOULD
   // be used by pingback proxies when propagating errors.
-
   switch ($error_code) {
     case LINKBACK_ERROR_LOCAL_NODE_NOT_FOUND:
       return array(0x0020, 'The specified target URI does not exist.');
