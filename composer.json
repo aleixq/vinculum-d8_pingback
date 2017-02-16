@@ -1,7 +1,7 @@
 {
   "name": "drupal/linkback_pingback",
   "type": "drupal-module",
-  "description": "pingback functions for vnculum",
+  "description": "pingback functions for Linkback",
   "keywords": ["Drupal"],
   "license": "GPL-2.0+",
   "homepage": "https://www.drupal.org/project/linkback_pingback",

@@ -27,6 +27,7 @@ function linkback_pingback_help($route_name, RouteMatchInterface $route_match) {
   }
 }
 
+
 /**
  * Implements hook_xmlrpc().
  *
@@ -54,7 +55,7 @@ function linkback_pingback_xmlrpc() {
 function linkback_pingback_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
   // @TODO: configurable view-modes?
   if ($view_mode == 'full' /*&& linkback_node_allows_linkback($node, 'receive')*/) {
-    $pingback_endpoint = Url::fromRoute('xmlrpc', [], ['absolute' => TRUE])->toString();
+    $pingback_endpoint = Url::fromRoute('xmlrpc', [], ['absolute' => TRUE ])->toString();
     $pingback_link = array(
       '#type' => 'html_tag',
       '#tag' => 'link',
@@ -66,6 +67,7 @@ function linkback_pingback_node_view(array &$build, EntityInterface $entity, Ent
     $build['#attached']['html_head'][] = [$pingback_link, 'linkback_pingback'];
   }
 }
+
 
 /**
  * XML-RPC callback for the pingback.ping method.
@@ -89,9 +91,9 @@ function linkback_pingback__receive_pingback($source_uri, $target_uri) {
     $langs = Drupal::languageManager()->getLanguages();
     foreach ($langs as $lan) {
       // Iterate over all languages to get entity id, here we can obtain entity type.
-      $route_params = Url::fromUserInput(str_replace($base_url, "", $target_uri), ['language' => $lan])->getRouteParameters();
+      $route_params = Url::fromUserInput(str_replace($base_url, "", $target_uri), ['language' => $lan ])->getRouteParameters();
       foreach ($route_params as $entity_type => $entity_id) {
-        // VALID ONLY FOR FIELD translate (as node translate has various nids for set)
+        // VALID ONLY FOR FIELD translate (as node translate has various nids for set).
         if ($entity_id) {
           $ref_content = $entity_id;
           break;

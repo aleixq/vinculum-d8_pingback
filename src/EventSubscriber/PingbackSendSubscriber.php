@@ -1,22 +1,26 @@
 <?php
 
+/**
+ * @file
+ * PingbackSendSubscriber implements EventSubscriberInterface. Can locate XMLRPC endpoint and send pingback.
+ * todo: Could be simplified using mention-client library which includes same type of functions.
+ */
+
 namespace Drupal\linkback_pingback\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\EventDispatcher\Event;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Request;
 use \Psr\Log\LoggerInterface;
-use Psr\Http\Message\RequestInterface;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
- * Class LinkbackSendSubscriber.
+ * Class PingbackSendSubscriber.
  *
  * @package Drupal\linkback_pingback
  */
-class LinkbackSendSubscriber implements EventSubscriberInterface {
+class PingbackSendSubscriber implements EventSubscriberInterface {
 
   /**
    * Agent.
@@ -42,12 +46,11 @@ class LinkbackSendSubscriber implements EventSubscriberInterface {
 
   /**
    * Constructor.
+   *
    * @param GuzzleHttp\Client $http_client
    *   GuzzleHttp\Client definition.
    * @param \Psr\Log\LoggerInterface $logger
-   *   A logger instance.
-
-   */
+   *   A logger instance.   *    */
   public function __construct(Client $http_client, LoggerInterface $logger) {
     $this->httpClient = $http_client;
     $this->logger = $logger;
@@ -74,7 +77,7 @@ class LinkbackSendSubscriber implements EventSubscriberInterface {
   }
 
   /**
-   * Sends the pingback
+   * Sends the pingback.
    *
    * @param Url $sourceUrl
    * @param Url $targetUrl
@@ -91,7 +94,7 @@ class LinkbackSendSubscriber implements EventSubscriberInterface {
       $methods = array(
         'pingback.ping' => array($source, $target),
       );
-      $result = xmlrpc($xmlrpc_endpoint, $methods, array('headers' => array('User-Agent' => self::UA )));
+      $result = xmlrpc($xmlrpc_endpoint, $methods, array('headers' => array('User-Agent' => self::UA)));
       if ($result) {
         $params = array(
           '%source' => $source,
@@ -117,8 +120,8 @@ class LinkbackSendSubscriber implements EventSubscriberInterface {
   /**
    * Get the URL of the XML-RPC endpoint that handles pingbacks for a URL.
    *
-   * @param String $url
-   * URL of the remote article
+   * @param string $url
+   *   URL of the remote article
    *
    * @return String|FALSE
    * Absolute URL of the XML-RPC endpoint, or FALSE if pingback is not
@@ -129,31 +132,35 @@ class LinkbackSendSubscriber implements EventSubscriberInterface {
       $response = $this->httpClient->get($url, array('headers' => array('Accept' => 'text/plain')));
       $data = $response->getBody(TRUE);
       $endpoint = $response->getHeader('X-Pingback');
-      if ($endpoint){
+      if ($endpoint) {
         return $endpoint[0];
       }
-      $crawler = new Crawler((string)$data);
+      $crawler = new Crawler((string) $data);
       $endpoint = $crawler->filter('link[rel="pingback"]')->extract('href');
-      if ($endpoint){
+      if ($endpoint) {
         return $endpoint[0];
-      }   
+      }
     }
     catch (BadResponseException $exception) {
       $response = $exception->getResponse();
       $this->logger->notice('Failed to fetch url %endpoint due to HTTP error "%error"', array(
-        '%endpoint' => $xmlrpc_endpoint, 
-        '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase()));
+        '%endpoint' => $xmlrpc_endpoint,
+        '%error' => $response->getStatusCode() . ' ' . $response->getReasonPhrase(),
+      ));
     }
-    catch (RequestException $exception) {   
-      $this->logger->notice('Failed to fetch url %endpoint due to error "%error"', array(
-        '%endpoint' => $xmlrpc_endpoint, 
-        '%error' => $exception->getMessage() ));
-    }
-    catch (InvalidArgumentException $exception){ 
+    catch (RequestException $exception) {
       $this->logger->notice('Failed to fetch url %endpoint due to error "%error"', array(
         '%endpoint' => $xmlrpc_endpoint,
-        '%error' => $exception->getMessage() ));
+        '%error' => $exception->getMessage(),
+      ));
+    }
+    catch (InvalidArgumentException $exception) {
+      $this->logger->notice('Failed to fetch url %endpoint due to error "%error"', array(
+        '%endpoint' => $xmlrpc_endpoint,
+        '%error' => $exception->getMessage(),
+      ));
     }
     return FALSE;
   }
+
 }
